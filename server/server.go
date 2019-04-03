@@ -12,8 +12,8 @@ import (
 
 	"errors"
 
-	"github.com/molon/pkg/gateway"
-	"github.com/molon/pkg/health"
+	"github.com/molon/pkg/server/gateway"
+	"github.com/molon/pkg/server/health"
 	"google.golang.org/grpc"
 )
 
