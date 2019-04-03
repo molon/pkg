@@ -51,6 +51,10 @@ func UnaryServerInterceptor(options ...TracingOption) grpc.UnaryServerIntercepto
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler,
 	) (resp interface{}, err error) {
+		if !opentracing.IsGlobalTracerRegistered() {
+			return handler(ctx, req)
+		}
+
 		md, ok := metadata.FromIncomingContext(ctx)
 		if !ok {
 			md = metadata.New(nil)
@@ -120,23 +124,10 @@ func UnaryServerInterceptor(options ...TracingOption) grpc.UnaryServerIntercepto
 }
 
 // UnaryClientInterceptor ...
-func UnaryClientInterceptor(interceptor grpc.UnaryClientInterceptor, options ...TracingOption) grpc.UnaryClientInterceptor {
+func UnaryClientInterceptor(options ...TracingOption) grpc.UnaryClientInterceptor {
 	tOpts := &tracingOptions{}
 	for _, opt := range options {
 		opt(tOpts)
-	}
-
-	if interceptor == nil {
-		interceptor = func(
-			ctx context.Context,
-			method string,
-			req, resp interface{},
-			cc *grpc.ClientConn,
-			invoker grpc.UnaryInvoker,
-			opts ...grpc.CallOption,
-		) error {
-			return invoker(ctx, method, req, resp, cc, opts...)
-		}
 	}
 
 	return func(
@@ -147,6 +138,10 @@ func UnaryClientInterceptor(interceptor grpc.UnaryClientInterceptor, options ...
 		invoker grpc.UnaryInvoker,
 		opts ...grpc.CallOption,
 	) (err error) {
+		if !opentracing.IsGlobalTracerRegistered() {
+			return invoker(ctx, method, req, resp, cc, opts...)
+		}
+
 		if opentracing.SpanFromContext(ctx) == nil {
 			//如果ctx里没传，就从gls获取
 			glsSpan := tracing.GetGlsTracingSpan()
@@ -212,7 +207,7 @@ func UnaryClientInterceptor(interceptor grpc.UnaryClientInterceptor, options ...
 		}
 
 		//执行请求
-		err = interceptor(ctx, method, req, resp, cc, invoker, opts...)
+		err = invoker(ctx, method, req, resp, cc, opts...)
 
 		//uid
 		uid := sp.BaggageItem(tracing.BaggageItemKeyUserID)

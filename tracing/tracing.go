@@ -17,6 +17,10 @@ const TagKeyUserID = "uid"
 // 开始一个span，内部会根据ctx或者gls信息来将链路串起来
 func StartSpan(ctx context.Context, call func(ctx context.Context, sp opentracing.Span) error,
 	operationName string, component string, opts ...opentracing.StartSpanOption) error {
+	if !opentracing.IsGlobalTracerRegistered() {
+		return call(ctx, nil)
+	}
+
 	if opentracing.SpanFromContext(ctx) == nil {
 		//如果ctx里没传，就从gls获取
 		glsSpan := GetGlsTracingSpan()
