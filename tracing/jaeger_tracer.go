@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strings"
 	"time"
 
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
 	"github.com/uber/jaeger-client-go/config"
 )
+
+const collectorEndpointSuffix = "/api/traces?format=jaeger.thrift"
 
 type JaegerLoggerAdapter struct{}
 
@@ -39,6 +42,9 @@ func (t *JaegerTracer) Close() error {
 }
 
 func DefaultJaegerConfiguration(svc string, collectorEndpoint string) config.Configuration {
+	if !strings.HasSuffix(collectorEndpoint, collectorEndpointSuffix) {
+		collectorEndpoint = strings.TrimSuffix(collectorEndpoint, "/") + collectorEndpointSuffix
+	}
 	return config.Configuration{
 		ServiceName: svc,
 		//直接全都记录，忽略采样，我们这里是当做日志来记
