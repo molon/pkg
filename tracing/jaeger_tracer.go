@@ -42,9 +42,17 @@ func (t *JaegerTracer) Close() error {
 }
 
 func DefaultJaegerConfiguration(svc string, collectorEndpoint string) config.Configuration {
+	svc = strings.Replace(svc, "://", "_", -1)
+	svc = strings.Replace(svc, ":", "_", -1)
+	svc = strings.Replace(svc, "/", "_", -1)
+
 	if !strings.HasSuffix(collectorEndpoint, collectorEndpointSuffix) {
 		collectorEndpoint = strings.TrimSuffix(collectorEndpoint, "/") + collectorEndpointSuffix
 	}
+	if !strings.HasPrefix(collectorEndpoint, "http://") {
+		collectorEndpoint = "http://" + collectorEndpoint
+	}
+
 	return config.Configuration{
 		ServiceName: svc,
 		//直接全都记录，忽略采样，我们这里是当做日志来记
