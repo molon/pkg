@@ -5,7 +5,7 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-func ProtoToJSONString(pb proto.Message) string {
+func ProtoToJSONStringForPrint(pb proto.Message) string {
 	marshaler := &jsonpb.Marshaler{
 		OrigName: true,
 		Indent:   "    ",
