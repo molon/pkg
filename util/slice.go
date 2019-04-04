@@ -23,3 +23,12 @@ func UniqueStringSlice(stringSlice []string) []string {
 	}
 	return list
 }
+
+func InStringSlice(s string, ss []string) bool {
+	for _, a := range ss {
+		if a == s {
+			return true
+		}
+	}
+	return false
+}
