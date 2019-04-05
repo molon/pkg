@@ -19,6 +19,7 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	"github.com/molon/pkg/tracing"
+	"github.com/molon/pkg/util"
 )
 
 type metadataReaderWriter struct {
@@ -267,16 +268,25 @@ func traceMD(sp opentracing.Span, md metadata.MD) {
 
 func marshalBodyToString(b interface{}) (string, error) {
 	pb, ok := b.(proto.Message)
-	if ok {
+	if ok && !util.IsNil(b) {
 		marshaler := &jsonpb.Marshaler{
 			EmitDefaults: true,
 			OrigName:     true,
 			AnyResolver:  anyResolver{},
 		}
-		return marshaler.MarshalToString(pb)
+		jsn, err := marshaler.MarshalToString(pb)
+		if err != nil {
+			return "", errors.Wrap(err, "jsonpb.MarshalToString failed")
+		}
+		return jsn, nil
 	}
 
-	return jsoniter.MarshalToString(b)
+	jsn, err := jsoniter.MarshalToString(b)
+	if err != nil {
+		return "", errors.Wrap(err, "jsoniter.MarshalToString failed")
+	}
+
+	return jsn, nil
 }
 
 type anyResolver struct{}
