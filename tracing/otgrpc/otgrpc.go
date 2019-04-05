@@ -3,8 +3,12 @@ package otgrpc
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"strings"
 
+	"github.com/golang/protobuf/jsonpb"
+	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/ptypes/empty"
 	eco "github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/opentracing/opentracing-go"
@@ -232,22 +236,22 @@ func UnaryClientInterceptor(options ...TracingOption) grpc.UnaryClientIntercepto
 }
 
 func traceRequest(sp opentracing.Span, req interface{}, maxBodyLogSize int) {
-	jsn, err := jsoniter.Marshal(req)
+	jsn, err := marshalBodyToString(req)
 	if err != nil {
 		ext.Error.Set(sp, true)
 		sp.LogFields(tracing.ErrorField(errors.Wrap(err, "Marshal request.body failed")))
 	} else {
-		sp.LogFields(log.String("request.body", tracing.PruneBodyLog(string(jsn), maxBodyLogSize)))
+		sp.LogFields(log.String("request.body", tracing.PruneBodyLog(jsn, maxBodyLogSize)))
 	}
 }
 
 func traceResponse(sp opentracing.Span, resp interface{}, maxBodyLogSize int) {
-	jsn, err := jsoniter.Marshal(resp)
+	jsn, err := marshalBodyToString(resp)
 	if err != nil {
 		ext.Error.Set(sp, true)
 		sp.LogFields(tracing.ErrorField(errors.Wrap(err, "Marshal response.body failed")))
 	} else {
-		sp.LogFields(log.String("response.body", tracing.PruneBodyLog(string(jsn), maxBodyLogSize)))
+		sp.LogFields(log.String("response.body", tracing.PruneBodyLog(jsn, maxBodyLogSize)))
 	}
 }
 
@@ -259,4 +263,32 @@ func traceMD(sp opentracing.Span, md metadata.MD) {
 	} else {
 		sp.LogFields(log.String("metadata", string(jsn)))
 	}
+}
+
+func marshalBodyToString(b interface{}) (string, error) {
+	pb, ok := b.(proto.Message)
+	if ok {
+		marshaler := &jsonpb.Marshaler{
+			EmitDefaults: true,
+			OrigName:     true,
+			AnyResolver:  anyResolver{},
+		}
+		return marshaler.MarshalToString(pb)
+	}
+
+	return jsoniter.MarshalToString(b)
+}
+
+type anyResolver struct{}
+
+func (anyResolver) Resolve(typeUrl string) (proto.Message, error) {
+	mname := typeUrl
+	if slash := strings.LastIndex(mname, "/"); slash >= 0 {
+		mname = mname[slash+1:]
+	}
+	mt := proto.MessageType(mname)
+	if mt == nil {
+		return &empty.Empty{}, nil
+	}
+	return reflect.New(mt.Elem()).Interface().(proto.Message), nil
 }

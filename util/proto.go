@@ -11,8 +11,9 @@ import (
 
 func ProtoToJSONStringForPrint(pb proto.Message) string {
 	marshaler := &jsonpb.Marshaler{
-		OrigName: true,
-		Indent:   "    ",
+		EmitDefaults: true,
+		OrigName:     true,
+		Indent:       "    ",
 	}
 	str, _ := marshaler.MarshalToString(pb)
 	return str
