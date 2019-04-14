@@ -11,6 +11,7 @@ import (
 
 	etcd "github.com/coreos/etcd/clientv3"
 	etcdnaming "github.com/coreos/etcd/clientv3/naming"
+	"github.com/molon/pkg/errors"
 )
 
 type DialFunc func(target string, opts ...grpc.DialOption) (interface{}, io.Closer, error)
@@ -63,7 +64,7 @@ func (cs *Store) Start() error {
 		for {
 			// 在watcher关闭之后会触发err
 			if err := cs.watchAddrUpdates(); err != nil {
-				if err != ErrWatcherClosed {
+				if errors.Cause(err) != ErrWatcherClosed {
 					cs.logger.WithError(err).Warnf("watchAddrUpdates")
 				}
 				return
