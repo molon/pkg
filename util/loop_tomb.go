@@ -26,12 +26,3 @@ func (t *LoopTomb) Go(f func(<-chan struct{})) {
 		f(t.c)
 	}()
 }
-func (t *LoopTomb) GoWithoutStopOthers(f func(<-chan struct{})) {
-	t.w.Add(1)
-
-	go func() {
-		defer t.w.Done()
-
-		f(t.c)
-	}()
-}
