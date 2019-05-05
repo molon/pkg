@@ -67,7 +67,6 @@ func newClient(ctx context.Context, logger *logrus.Entry, target string, dial fu
 }
 
 func (c *client) cli() interface{} {
-	// TODO: 这里是否要做为nil时阻塞呢
 	c.mu.RLock()
 	cli := c.cc
 	c.mu.RUnlock()
