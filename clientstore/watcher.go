@@ -48,7 +48,7 @@ func (gw *GRPCWatcher) Next() ([]*Update, error) {
 
 	wr, ok := <-gw.wch
 	if !ok {
-		gw.err = errors.Wrap(ErrWatcherClosed)
+		gw.err = errors.WithStack(ErrWatcherClosed)
 		return nil, gw.err
 	}
 	if gw.err = wr.Err(); gw.err != nil {
@@ -77,7 +77,7 @@ func (gw *GRPCWatcher) Next() ([]*Update, error) {
 func (gw *GRPCWatcher) firstNext() ([]*Update, error) {
 	resp, err := gw.c.Get(gw.ctx, gw.targetPrefix, etcd.WithPrefix(), etcd.WithSerializable())
 	if gw.err = err; err != nil {
-		return nil, errors.Wrap(err)
+		return nil, errors.WithStack(err)
 	}
 
 	updates := make([]*Update, 0, len(resp.Kvs))
@@ -101,7 +101,7 @@ func (gw *GRPCWatcher) Close() { gw.cancel() }
 func unmarshalToUpdate(kv *mvccpb.KeyValue) (*Update, error) {
 	var jupdate Update
 	if err := json.Unmarshal(kv.Value, &jupdate); err != nil {
-		return nil, errors.Wrap(err)
+		return nil, errors.WithStack(err)
 	}
 
 	// key会是 msg://boat/[::]:51841 这种，target名称是 msg://boat

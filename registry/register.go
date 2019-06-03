@@ -29,7 +29,7 @@ func registerSession(ll *logrus.Entry, c *clientv3.Client, prefix string, addr s
 
 	gr := &naming.GRPCResolver{Client: c}
 	if err = gr.Update(c.Ctx(), prefix, gnaming.Update{Op: gnaming.Add, Addr: addr}, clientv3.WithLease(ss.Lease())); err != nil {
-		return nil, errors.Wrap(err)
+		return nil, errors.WithStack(err)
 	}
 
 	ll.Infof("Registered \"%s/%s\" with %d-second lease", prefix, addr, ttl)

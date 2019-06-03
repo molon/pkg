@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/molon/pkg/errors"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
-	"github.com/pkg/errors"
 )
 
 // 这俩是比较特殊的key，经常查问题是定位到某个用户的

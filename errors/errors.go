@@ -1,8 +1,6 @@
 package errors
 
 import (
-	"fmt"
-
 	pkgerr "github.com/pkg/errors"
 )
 
@@ -10,27 +8,30 @@ func Cause(err error) error {
 	return pkgerr.Cause(err)
 }
 
-func Wrap(err error) error {
-	// 如果没包过，就包一下
-	// 否则也不包了，保留起源的堆栈信息
-	type causer interface {
-		Cause() error
-	}
-	if _, ok := err.(causer); !ok {
-		err = pkgerr.WithStack(err)
-	}
-
-	return err
+func New(message string) error {
+	return pkgerr.New(message)
 }
 
-func Wrapf(format string, a ...interface{}) error {
-	return Wrap(fmt.Errorf(format, a...))
+func Errorf(format string, args ...interface{}) error {
+	return pkgerr.Errorf(format, args...)
 }
 
-func WrapRecovery(p interface{}) error {
-	perr, ok := p.(error)
-	if !ok {
-		perr = fmt.Errorf(fmt.Sprint(p))
-	}
-	return Wrap(perr)
+func WithStack(err error) error {
+	return pkgerr.WithStack(err)
+}
+
+func Wrap(err error, message string) error {
+	return pkgerr.Wrap(err, message)
+}
+
+func Wrapf(err error, format string, args ...interface{}) error {
+	return pkgerr.Wrapf(err, format, args...)
+}
+
+func WithMessage(err error, message string) error {
+	return pkgerr.WithMessage(err, message)
+}
+
+func WithMessagef(err error, format string, args ...interface{}) error {
+	return pkgerr.WithMessagef(err, format, args...)
 }

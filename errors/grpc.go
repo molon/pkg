@@ -52,5 +52,5 @@ func StreamServerInterceptor(options ...InterceptorOption) grpc.StreamServerInte
 }
 
 func Statusf(c codes.Code, format string, a ...interface{}) error {
-	return Wrap(status.Errorf(c, format, a...))
+	return WithStack(status.Errorf(c, format, a...))
 }

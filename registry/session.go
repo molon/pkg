@@ -34,7 +34,7 @@ func NewSession(client *v3.Client, opts ...SessionOption) (*Session, error) {
 	if id == v3.NoLease {
 		resp, err := client.Grant(ops.ctx, int64(ops.ttl))
 		if err != nil {
-			return nil, errors.Wrap(err)
+			return nil, errors.WithStack(err)
 		}
 		id = v3.LeaseID(resp.ID)
 	}
@@ -43,7 +43,7 @@ func NewSession(client *v3.Client, opts ...SessionOption) (*Session, error) {
 	keepAlive, err := client.KeepAlive(ctx, id)
 	if err != nil || keepAlive == nil {
 		cancel()
-		return nil, errors.Wrap(err)
+		return nil, errors.WithStack(err)
 	}
 
 	donec := make(chan struct{})
@@ -87,7 +87,7 @@ func (s *Session) Close() error {
 	ctx, cancel := context.WithTimeout(s.opts.ctx, time.Duration(s.opts.ttl)*time.Second)
 	_, err := s.client.Revoke(ctx, s.id)
 	cancel()
-	return errors.Wrap(err)
+	return errors.WithStack(err)
 }
 
 type sessionOptions struct {

@@ -11,10 +11,10 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	eco "github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/molon/pkg/errors"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/opentracing/opentracing-go/log"
-	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 
