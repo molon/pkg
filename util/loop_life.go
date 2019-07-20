@@ -9,26 +9,24 @@ type LoopLife struct {
 }
 
 // LoopTomb里的任务只要有一个结束了，所有的都会结束
-// LoopLife里的任务并不会，且额外提供了Wait()方法便于阻塞等待所有任务的正常执行结束
+// LoopLife里的任务只有返回了错误之后才会所有的都结束，且额外提供了Wait()方法便于阻塞等待所有任务的正常执行结束
 func NewLoopLife() *LoopLife {
 	return &LoopLife{c: make(chan struct{})}
 }
 
-func (t *LoopLife) Dying() <-chan struct{} { return t.c }
-func (t *LoopLife) Close() {
-	t.o.Do(func() {
-		close(t.c)
-	})
-	t.Wait()
-}
+func (t *LoopLife) stop()  { t.o.Do(func() { close(t.c) }) }
+func (t *LoopLife) Close() { t.stop(); t.Wait() }
+func (t *LoopLife) Wait()  { t.w.Wait() }
 
-func (t *LoopLife) Wait() { t.w.Wait() }
-func (t *LoopLife) Go(f func(<-chan struct{})) {
+func (t *LoopLife) Dying() <-chan struct{} { return t.c }
+func (t *LoopLife) Go(f func(<-chan struct{}) error) {
 	t.w.Add(1)
 
 	go func() {
 		defer t.w.Done()
 
-		f(t.c)
+		if err := f(t.c); err != nil {
+			t.stop()
+		}
 	}()
 }
