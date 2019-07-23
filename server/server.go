@@ -207,12 +207,12 @@ func (s *Server) Stop() error {
 		defer wg.Done()
 
 		if s.GRPCServer != nil {
+			// 先尝试GracefulStop，10秒还不成，再强制Stop
 			stopped := make(chan struct{})
 			go func() {
 				s.GRPCServer.GracefulStop()
 				close(stopped)
 			}()
-			// 先尝试GracefulStop，10秒还不成，再强制Stop
 			t := time.NewTimer(10 * time.Second)
 			select {
 			case <-t.C:
@@ -225,8 +225,18 @@ func (s *Server) Stop() error {
 	go func() {
 		defer wg.Done()
 		if s.HTTPServer != nil {
-			if err := s.HTTPServer.Close(); err != nil {
-				errC <- err
+			// 尝试Shutdown，超时10秒
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			if err := s.HTTPServer.Shutdown(ctx); err != nil {
+				if err != context.DeadlineExceeded {
+					errC <- err
+					return
+				}
+				// 如果是因为超时，则再尝试一发Close
+				if err := s.HTTPServer.Close(); err != nil {
+					errC <- err
+				}
 			}
 		}
 	}()
