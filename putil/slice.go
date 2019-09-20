@@ -1,4 +1,4 @@
-package util
+package putil
 
 func UniqueIntSlice(intSlice []int) []int {
 	keys := make(map[int]bool)

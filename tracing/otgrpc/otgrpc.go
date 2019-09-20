@@ -19,7 +19,7 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	"github.com/molon/pkg/tracing"
-	"github.com/molon/pkg/util"
+	"github.com/molon/pkg/putil"
 )
 
 type metadataReaderWriter struct {
@@ -268,7 +268,7 @@ func traceMD(sp opentracing.Span, md metadata.MD) {
 
 func marshalBodyToString(b interface{}) (string, error) {
 	pb, ok := b.(proto.Message)
-	if ok && !util.IsNil(b) {
+	if ok && !putil.IsNil(b) {
 		marshaler := &jsonpb.Marshaler{
 			EmitDefaults: true,
 			OrigName:     true,
