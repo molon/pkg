@@ -7,8 +7,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/molon/pkg/plog"
+
 	opentracing "github.com/opentracing/opentracing-go"
-	"github.com/sirupsen/logrus"
 	"github.com/uber/jaeger-client-go/config"
 )
 
@@ -24,12 +25,15 @@ func (l *JaegerLoggerAdapter) Infof(msg string, args ...interface{}) {
 	log.Println("Jaeger:", fmt.Sprintf(msg, args...))
 }
 
-type logrusWrapper struct {
-	*logrus.Logger
+type loggerWrapper struct {
 }
 
-func (l *logrusWrapper) Error(msg string) {
-	l.Logger.Errorf(msg)
+func (l *loggerWrapper) Error(msg string) {
+	plog.Errorf(msg)
+}
+
+func (l *loggerWrapper) Infof(msg string, args ...interface{}) {
+	plog.Infof(msg, args...)
 }
 
 type JaegerTracer struct {
@@ -70,14 +74,11 @@ func DefaultJaegerConfiguration(svc string, collectorEndpoint string) config.Con
 	}
 }
 
-func NewJaegerTracer(logger *logrus.Logger, cfg config.Configuration, options ...config.Option) (*JaegerTracer, error) {
+func NewJaegerTracer(cfg config.Configuration, options ...config.Option) (*JaegerTracer, error) {
 	opts := []config.Option{
 		config.ZipkinSharedRPCSpan(false),
 	}
-	if logger != nil {
-		opts = append(opts, config.Logger(&logrusWrapper{Logger: logger}))
-	}
-
+	opts = append(opts, config.Logger(&loggerWrapper{}))
 	opts = append(opts, options...)
 
 	t, closer, err := cfg.NewTracer(opts...)

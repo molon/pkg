@@ -6,7 +6,7 @@ import (
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/clientv3/naming"
 	"github.com/molon/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"github.com/molon/pkg/plog"
 	"golang.org/x/time/rate"
 	gnaming "google.golang.org/grpc/naming"
 )
@@ -20,7 +20,7 @@ type Register struct {
 	cancel context.CancelFunc
 }
 
-func registerSession(ll *logrus.Entry, c *clientv3.Client, prefix string, addr string, ttl int) (*Session, error) {
+func registerSession(c *clientv3.Client, prefix string, addr string, ttl int) (*Session, error) {
 
 	ss, err := NewSession(c, WithTTL(ttl), WithContext(c.Ctx()))
 	if err != nil {
@@ -32,15 +32,11 @@ func registerSession(ll *logrus.Entry, c *clientv3.Client, prefix string, addr s
 		return nil, errors.WithStack(err)
 	}
 
-	ll.Infof("Registered \"%s/%s\" with %d-second lease", prefix, addr, ttl)
+	plog.Infof("Registered \"%s/%s\" with %d-second lease", prefix, addr, ttl)
 	return ss, nil
 }
 
-func NewRegister(logger *logrus.Logger, c *clientv3.Client, prefix string, addr string, ttl int) *Register {
-	ll := logger.WithFields(logrus.Fields{
-		"pkg": "registry",
-	})
-
+func NewRegister(c *clientv3.Client, prefix string, addr string, ttl int) *Register {
 	doneC := make(chan struct{})
 	ctx, cancel := context.WithCancel(c.Ctx())
 	r := &Register{
@@ -54,9 +50,9 @@ func NewRegister(logger *logrus.Logger, c *clientv3.Client, prefix string, addr 
 
 		rm := rate.NewLimiter(rate.Limit(registerRetryRate), registerRetryRate)
 		for rm.Wait(ctx) == nil {
-			ss, err := registerSession(ll, c, prefix, addr, ttl)
+			ss, err := registerSession(c, prefix, addr, ttl)
 			if err != nil {
-				ll.WithError(err).Warningf("RegisterSession")
+				plog.Warnf("RegisterSession")
 				continue
 			}
 
@@ -64,13 +60,13 @@ func NewRegister(logger *logrus.Logger, c *clientv3.Client, prefix string, addr 
 			case <-ctx.Done():
 				err := ss.Close()
 				if err != nil {
-					ll.WithError(err).Warning("Ctx done, session close")
+					plog.Warn("Ctx done, session close")
 				}
 				return
 
 			case <-ss.Done():
-				ll.Warning("Session expired; possible network partition or server restart")
-				ll.Warning("Creating a new session to rejoin")
+				plog.Warn("Session expired; possible network partition or server restart")
+				plog.Warn("Creating a new session to rejoin")
 				continue
 			}
 		}
