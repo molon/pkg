@@ -8,8 +8,8 @@ import (
 )
 
 type Model struct {
-	Id        string `gorm:"size:20;primary_key"`
-	CreatedAt time.Time
+	Id        string    `gorm:"size:20;primary_key"`
+	CreatedAt time.Time `sql:"index"`
 	UpdatedAt time.Time
 	DeletedAt *time.Time `sql:"index"`
 	Version   int64

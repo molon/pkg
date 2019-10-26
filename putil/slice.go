@@ -1,5 +1,14 @@
 package putil
 
+import (
+	"math/rand"
+	"time"
+)
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
 func UniqueIntSlice(intSlice []int) []int {
 	keys := make(map[int]bool)
 	list := []int{}
@@ -31,4 +40,10 @@ func InStringSlice(s string, ss []string) bool {
 		}
 	}
 	return false
+}
+
+func ShuffleStringSlice(words []string) {
+	rand.Shuffle(len(words), func(i, j int) {
+		words[i], words[j] = words[j], words[i]
+	})
 }
