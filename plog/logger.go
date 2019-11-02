@@ -28,5 +28,9 @@ func SetLogger(l Logger) {
 
 func newLogger() Logger {
 	l := logrus.StandardLogger()
+	l.SetFormatter(&logrus.TextFormatter{
+		FullTimestamp:   true,
+		TimestampFormat: "2006-01-02 15:04:05.000000",
+	})
 	return l
 }
