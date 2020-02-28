@@ -1,8 +1,29 @@
 package plog
 
-import "os"
+import (
+	"os"
+
+	"github.com/sirupsen/logrus"
+)
+
+func newLogger() Logger {
+	l := logrus.StandardLogger()
+	l.SetFormatter(&logrus.TextFormatter{
+		FullTimestamp:   true,
+		TimestampFormat: "2006-01-02 15:04:05.000000",
+	})
+	return l
+}
 
 var logger = newLogger()
+
+func SetLogger(l Logger) {
+	logger = l
+}
+
+func GetLogger() Logger {
+	return logger
+}
 
 func Debug(args ...interface{}) {
 	logger.Debug(args...)
@@ -33,6 +54,10 @@ func Warn(args ...interface{}) {
 }
 
 func Warnf(format string, args ...interface{}) {
+	logger.Warnf(format, args...)
+}
+
+func Warningf(format string, args ...interface{}) {
 	logger.Warnf(format, args...)
 }
 

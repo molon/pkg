@@ -47,7 +47,7 @@ type Server struct {
 type Option func(*Server) error
 
 // InitializerFunc is a handler that can be passed into WithInitializer to be executed prior to serving
-type InitializerFunc func(context.Context) error
+type InitializerFunc func(*Server, context.Context) error
 
 // NewServer creates a Server from the given options. All options are processed in the order they are declared.
 func NewServer(opts ...Option) (*Server, error) {
@@ -259,7 +259,7 @@ func (s *Server) initialize() error {
 	for _, initFunc := range s.initializers {
 		go func(init InitializerFunc) {
 			defer wg.Done()
-			if err := init(ctx); err != nil {
+			if err := init(s, ctx); err != nil {
 				errC <- err
 			}
 		}(initFunc)

@@ -21,7 +21,6 @@ type Register struct {
 }
 
 func registerSession(c *clientv3.Client, prefix string, addr string, ttl int) (*Session, error) {
-
 	ss, err := NewSession(c, WithTTL(ttl), WithContext(c.Ctx()))
 	if err != nil {
 		return nil, err

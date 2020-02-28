@@ -1,9 +1,10 @@
 package health
 
 import (
-	"encoding/json"
 	"net/http"
 	"sync"
+
+	jsoniter "github.com/json-iterator/go"
 )
 
 type checksHandler struct {
@@ -109,7 +110,7 @@ func (ch *checksHandler) handle(rw http.ResponseWriter, r *http.Request, checksS
 	if status == http.StatusOK {
 		rw.Write([]byte("{}\n"))
 	} else {
-		encoder := json.NewEncoder(rw)
+		encoder := jsoniter.NewEncoder(rw)
 		encoder.SetIndent("", "    ")
 		encoder.Encode(errors)
 	}
