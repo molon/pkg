@@ -48,8 +48,13 @@ func InStringSlice(s string, ss []string) bool {
 	return false
 }
 
-func ShuffleStringSlice(words []string) {
-	rand.Shuffle(len(words), func(i, j int) {
-		words[i], words[j] = words[j], words[i]
+func ShuffleStringSlice(words []string) []string {
+	nws := make([]string, len(words))
+	for idx, w := range words {
+		nws[idx] = w
+	}
+	rand.Shuffle(len(nws), func(i, j int) {
+		nws[i], nws[j] = nws[j], nws[i]
 	})
+	return nws
 }
