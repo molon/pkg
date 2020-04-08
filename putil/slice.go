@@ -2,6 +2,7 @@ package putil
 
 import (
 	"math/rand"
+	"strings"
 )
 
 func UniqueIntSlice(intSlice []int) []int {
@@ -22,6 +23,16 @@ func UniqueStringSlice(stringSlice []string) []string {
 	for _, entry := range stringSlice {
 		if _, value := keys[entry]; !value {
 			keys[entry] = true
+			list = append(list, entry)
+		}
+	}
+	return list
+}
+
+func NonEmptyStringSlice(stringSlice []string) []string {
+	list := []string{}
+	for _, entry := range stringSlice {
+		if strings.TrimSpace(entry) != "" {
 			list = append(list, entry)
 		}
 	}
