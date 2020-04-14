@@ -11,7 +11,7 @@ func TimeUnixMilli(t time.Time) int64 {
 	return t.UnixNano() / int64(time.Millisecond)
 }
 
-func TimeNowUnixMilli(t time.Time) int64 {
+func TimeNowUnixMilli() int64 {
 	return TimeUnixMilli(time.Now())
 }
 
