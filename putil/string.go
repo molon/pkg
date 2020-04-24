@@ -16,8 +16,12 @@ func RandLowerString(n int) string {
 }
 
 func SplitLineBreak(str string) []string {
+	return SplitTrimNonEmpty(str, "\n")
+}
+
+func SplitTrimNonEmpty(str string, sep string) []string {
 	ret := []string{}
-	lines := strings.Split(str, "\n")
+	lines := strings.Split(str, sep)
 	for _, line := range lines {
 		line := strings.TrimSpace(line)
 		if line == "" {
