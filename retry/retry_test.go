@@ -1,7 +1,12 @@
 package retry
 
 import (
+	"log"
 	"testing"
+
+	"context"
+
+	"github.com/molon/pkg/errors"
 )
 
 func TestRetry(t *testing.T) {
@@ -15,4 +20,15 @@ func TestRetry(t *testing.T) {
 	// 	WithDelay(66*time.Second),
 	// )
 	// log.Printf("%p %#v", r, r)
+
+	ctx := context.Background()
+	Do(ctx, "MainFlow",
+		func(ctx context.Context, idx int) error {
+			return errors.New("tmp")
+		},
+		WithFix(func(ctx context.Context, name string, idx int, err error) error {
+			log.Println(err)
+			return err
+		}),
+	)
 }

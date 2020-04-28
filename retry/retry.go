@@ -76,6 +76,8 @@ func (r *Retry) Clone() *Retry {
 		delay:   r.delay,
 		timeout: r.timeout,
 		log:     r.log,
+		wait:    r.wait,
+		fix:     r.fix,
 	}
 }
 
