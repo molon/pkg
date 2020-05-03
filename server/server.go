@@ -173,7 +173,13 @@ func (s *Server) Serve(grpcL, httpL net.Listener) error {
 		if s.HTTPServer == nil {
 			return errors.New("httpL is specified, but no HTTPServer is provided")
 		}
-		go func() { errC <- s.HTTPServer.Serve(httpL) }()
+		go func() {
+			if s.HTTPServer.TLSConfig != nil {
+				errC <- s.HTTPServer.ServeTLS(httpL, "", "")
+			} else {
+				errC <- s.HTTPServer.Serve(httpL)
+			}
+		}()
 	} else {
 		s.HTTPServer = nil
 	}
