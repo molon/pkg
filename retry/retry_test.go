@@ -22,13 +22,17 @@ func TestRetry(t *testing.T) {
 	// log.Printf("%p %#v", r, r)
 
 	ctx := context.Background()
-	Do(ctx, "MainFlow",
+	err := Do(ctx, "MainFlow",
 		func(ctx context.Context, idx int) error {
 			return errors.New("tmp")
 		},
 		WithFix(func(ctx context.Context, name string, idx int, err error) error {
 			log.Println(err)
-			return err
+			return nil
 		}),
+		WithN(10),
 	)
+	if err != nil {
+		log.Println("FINAL:", err)
+	}
 }
