@@ -42,12 +42,12 @@ func NewLog(printf func(format string, v ...interface{})) func(context.Context, 
 				tips = fmt.Sprintf("%s Wait Failed: %v", name, err)
 			}
 		case StatusBegin:
-			tips = fmt.Sprintf("%s...", name)
+			tips = fmt.Sprintf("%s ...", name)
 		case StatusEnd:
 			if err != nil {
 				tips = fmt.Sprintf("%s Failed: %v", name, err)
 			} else {
-				tips = fmt.Sprintf("%s Successfully!", name)
+				tips = fmt.Sprintf("%s Successfully !", name)
 			}
 		}
 
@@ -59,6 +59,48 @@ func NewLog(printf func(format string, v ...interface{})) func(context.Context, 
 			tips = fmt.Sprintf("#%d %s", idx, tips)
 		}
 		printf("%s", tips)
+	}
+}
+
+func NewLevelLog(printf func(good bool, format string, v ...interface{})) func(context.Context, string, int, Status, error) {
+	return func(ctx context.Context, name string, idx int, s Status, err error) {
+		if printf == nil {
+			return
+		}
+
+		if name == "" {
+			return
+		}
+
+		var tips string
+		good := true
+		switch s {
+		case StatusWaitBegin:
+			// tips = fmt.Sprintf("%s Wait...", name)
+		case StatusWaitEnd:
+			if err != nil {
+				tips = fmt.Sprintf("%s Wait Failed: %v", name, err)
+				good = false
+			}
+		case StatusBegin:
+			tips = fmt.Sprintf("%s ...", name)
+		case StatusEnd:
+			if err != nil {
+				tips = fmt.Sprintf("%s Failed: %v", name, err)
+				good = false
+			} else {
+				tips = fmt.Sprintf("%s Successfully !", name)
+			}
+		}
+
+		if tips == "" {
+			return
+		}
+
+		if idx > 0 {
+			tips = fmt.Sprintf("#%d %s", idx, tips)
+		}
+		printf(good, "%s", tips)
 	}
 }
 
