@@ -31,3 +31,30 @@ func SplitTrimNonEmpty(str string, sep string) []string {
 	}
 	return ret
 }
+
+func MaskMiddle(str string) string {
+	if len(str) <= 0 {
+		return ""
+	}
+
+	half := len(str) / 2
+
+	for len(str)-2*half <= 0 {
+		half--
+	}
+
+	if half > 6 {
+		half = 6
+	}
+	strLen := len(str) - 2*half
+	if strLen > 20 {
+		strLen = 20
+	}
+
+	ret := str[:half]
+	for idx := 0; idx < strLen; idx++ {
+		ret += "*"
+	}
+	ret += str[len(str)-half:]
+	return ret
+}
