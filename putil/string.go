@@ -47,8 +47,8 @@ func MaskMiddle(str string) string {
 		half = 6
 	}
 	strLen := len(str) - 2*half
-	if strLen > 20 {
-		strLen = 20
+	if strLen > 10 {
+		strLen = 10
 	}
 
 	ret := str[:half]
